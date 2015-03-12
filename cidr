@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-12 16:33:48
+# Last changed: 2015-03-12 22:37:45
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -30,32 +30,34 @@ import sys
 import os
 import re
 
+
+def error(message, exit=-1):
+    '''Display an error MESSAGE, use EXIT as a return value if >= 0.'''
+    click.secho(message, fg='red')
+    if exit >= 0:
+        sys.exit(exit)
+
 def parse_config(file):
     '''Parse YAML configuration FILE and return a dict'''
     if not os.path.exists(file):
-        sys.stderr.write('Could not read configuration file "%s"\n' % file)
-        sys.exit(1)
+        error('Could not read configuration file "%s"\n' % file, 1)
     with open(file, 'r') as f:
         try:
             conf = yaml.safe_load(f)
         except yaml.scanner.ScannerError, e:
-            sys.stderr.write('Error found in configuration: %s\n' % e)
-            sys.exit(1)
+            error('Error found in configuration: %s\n' % e, 1)
 
 
     # Sanity checks
     if not conf.has_key('devices'):
-        sys.stderr.write('No devices found in configuration')
-        sys.exit(1)
+        error('No devices found in configuration', 1)
 
     if not conf.has_key('drivers'):
-        sys.stderr.write('No driver found in configuration')
-        sys.exit(1)
+        error('No driver found in configuration', 1)
         
     for key in conf['drivers']:
         if not conf['drivers'][key].has_key('commands'):
-            sys.stderr.write('No command found for driver "%s"' % key)
-            sys.exit(1)
+            error('No command found for driver "%s"' % key, 1)
         # precompile filter regexps:
         filters = []
         if conf['drivers'][key].has_key('filters'):
@@ -130,14 +132,14 @@ def do_backup_config(job, host, conn, config, devices_config):
     try:
         host_driver = devices_config[host_addr]['driver']
     except KeyError:
-        sys.stderr.write('No driver found for host "%s"\n' % host_addr)
+        error('No driver found for host "%s"\n' % host_addr)
         return
     
     try:
         driver = config['drivers'][host_driver]
     except KeyError:
-        sys.stderr.write('Cannot find driver "%s" for host "%s"\n' %\
-                         (host_driver, host_addr))
+        error('Cannot find driver "%s" for host "%s"\n' % \
+              (host_driver, host_addr))
         return
 
     commands = driver['commands']
@@ -148,7 +150,7 @@ def do_backup_config(job, host, conn, config, devices_config):
     try:
         conn.authenticate(host.get_account(), flush = False)
     except Exscript.protocols.Exception.LoginFailure, e:
-        sys.stderr.write('Cannot log into %s: %s\n' % (host_addr, e))
+        error('Cannot log into %s: %s\n' % (host_addr, e))
         return
     
     if devices_config[host_addr].has_key('enable') and \
@@ -157,7 +159,7 @@ def do_backup_config(job, host, conn, config, devices_config):
         try:
             conn.app_authorize(host.account, flush = False)
         except Exscript.protocols.Exception.LoginFailure, e:
-            sys.stderr.write('Cannot enable on %s: %s\n' % (host_addr, e))
+            error('Cannot enable on %s: %s\n' % (host_addr, e))
             conn.send('exit\r')
             conn.close()
             return
