@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-12 22:37:45
+# Last changed: 2015-03-12 22:50:08
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -102,8 +102,11 @@ def generate_access(config):
             
 
 
-@click.group()
-@click.option('--config', help='Configuration file')
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('--config',
+              type=click.Path(exists=True),
+              default='cidr.yml',
+              help='Configuration file')
 @click.option('--verbose', '-v', default=0, count=True, help='verbose output')
 @click.pass_context
 def cli(ctx, config, verbose):
@@ -114,8 +117,6 @@ def cli(ctx, config, verbose):
         (ctx.obj['ex_hosts'],
          ctx.obj['ex_accounts'],
          ctx.obj['devices_config']) = generate_access(ctx.obj['config'])
-    else:
-        ctx.obj['config'] = None
 
     if verbose:
         ctx.obj['verbose'] = verbose
