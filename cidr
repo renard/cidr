@@ -1,0 +1,239 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+# cidr --- Cird Is not as Dumb as Rancid
+
+Easy network management tool
+
+"""
+
+# Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
+# Created: 2015-03-12
+# Last changed: 2015-03-12 16:33:48
+
+# This program is free software. It comes without any warranty, to
+# the extent permitted by applicable law. You can redistribute it
+# and/or modify it under the terms of the Do What The Fuck You Want
+# To Public License, Version 2, as published by Sam Hocevar. See
+# http://sam.zoy.org/wtfpl/COPYING for more details.
+
+
+__author__ = "Sébastien Gross"
+__copyright__ = """Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>"""
+
+
+import Exscript
+import yaml
+import click
+import sys
+import os
+import re
+
+def parse_config(file):
+    '''Parse YAML configuration FILE and return a dict'''
+    if not os.path.exists(file):
+        sys.stderr.write('Could not read configuration file "%s"\n' % file)
+        sys.exit(1)
+    with open(file, 'r') as f:
+        try:
+            conf = yaml.safe_load(f)
+        except yaml.scanner.ScannerError, e:
+            sys.stderr.write('Error found in configuration: %s\n' % e)
+            sys.exit(1)
+
+
+    # Sanity checks
+    if not conf.has_key('devices'):
+        sys.stderr.write('No devices found in configuration')
+        sys.exit(1)
+
+    if not conf.has_key('drivers'):
+        sys.stderr.write('No driver found in configuration')
+        sys.exit(1)
+        
+    for key in conf['drivers']:
+        if not conf['drivers'][key].has_key('commands'):
+            sys.stderr.write('No command found for driver "%s"' % key)
+            sys.exit(1)
+        # precompile filter regexps:
+        filters = []
+        if conf['drivers'][key].has_key('filters'):
+            for filter in conf['drivers'][key]['filters']:
+                filters.append(re.compile(filter))
+        conf['drivers'][key]['filters'] = filters
+            
+    return conf
+
+
+def generate_access(config):
+    '''From CONFIG dict, generate access suitable for Exscript'''
+    devices = config['devices']
+
+    ex_hosts = []
+    ex_accounts = []
+    devices_config = {}
+    
+    for device in devices:
+        if device.has_key('same-as') and isinstance(device['same-as'], list):
+            hosts = [ device['name'] ] + device['same-as']
+        else:
+            hosts = [ device['name'] ]
+
+        for host in hosts:
+            _host = Exscript.Host('%s://%s' % (device['protocol'], host))
+            _enable = None
+            if device.has_key('enable') and device['enable'] is not None:
+                _enable = device['enable']
+            _account = Exscript.Account(device['username'],
+                                        password=device['password'],
+                                        password2=_enable)
+                
+                
+            _host.set_account(_account)
+            ex_hosts.append(_host)
+            ex_accounts.append(_account)
+            devices_config[host] = device
+    return(ex_hosts, ex_accounts, devices_config)
+            
+
+            
+
+
+@click.group()
+@click.option('--config', help='Configuration file')
+@click.option('--verbose', '-v', default=0, count=True, help='verbose output')
+@click.pass_context
+def cli(ctx, config, verbose):
+
+    
+    if config is not None:
+        ctx.obj['config'] = parse_config(config)
+        (ctx.obj['ex_hosts'],
+         ctx.obj['ex_accounts'],
+         ctx.obj['devices_config']) = generate_access(ctx.obj['config'])
+    else:
+        ctx.obj['config'] = None
+
+    if verbose:
+        ctx.obj['verbose'] = verbose
+    else:
+        if ctx.obj['config'].has_key('verbose'):
+            ctx.obj['verbose'] = ctx.obj['config']['verbose']
+        else:
+            ctx.obj['verbose'] = -1
+
+def do_backup_config(job, host, conn, config, devices_config):
+    '''Callback function used to backup a single host configuration.'''
+
+    host_addr = host.get_address()
+    try:
+        host_driver = devices_config[host_addr]['driver']
+    except KeyError:
+        sys.stderr.write('No driver found for host "%s"\n' % host_addr)
+        return
+    
+    try:
+        driver = config['drivers'][host_driver]
+    except KeyError:
+        sys.stderr.write('Cannot find driver "%s" for host "%s"\n' %\
+                         (host_driver, host_addr))
+        return
+
+    commands = driver['commands']
+    filters = driver['filters']
+
+    # enable host
+    # TODO: Move out function?
+    try:
+        conn.authenticate(host.get_account(), flush = False)
+    except Exscript.protocols.Exception.LoginFailure, e:
+        sys.stderr.write('Cannot log into %s: %s\n' % (host_addr, e))
+        return
+    
+    if devices_config[host_addr].has_key('enable') and \
+       devices_config[host_addr]['enable'] is not None:
+        conn.execute('enable')
+        try:
+            conn.app_authorize(host.account, flush = False)
+        except Exscript.protocols.Exception.LoginFailure, e:
+            sys.stderr.write('Cannot enable on %s: %s\n' % (host_addr, e))
+            conn.send('exit\r')
+            conn.close()
+            return
+
+    conf_file = '%s/%s' % (config['output-dir'], host_addr)
+    conf_file_new = '%s.new' % conf_file
+
+    comment = '!'
+    if driver.has_key('comment'):
+        comment = driver['comment']
+
+    line_break = '\r\n'
+    if driver.has_key('line-break'):
+        line_break = driver['line-break']
+    
+        
+    with file(conf_file_new, 'w+') as output:
+        for cmd in commands:
+            conn.response = None
+            conn.execute(cmd['cli'])
+            conn.waitfor(conn.get_prompt())
+
+            # by default capture command output
+            if cmd.has_key('display') and cmd['display'] is not True:
+                continue
+
+            # By default do not quote line
+            prefix = ''
+            if cmd.has_key('quote') and cmd['quote'] is True:
+                prefix = '%s ' % comment
+            
+            output.write('\n%s\n%s >> "%s"\n%s\n' % (comment, comment,
+                                                   cmd['cli'], comment))
+
+            for l in conn.response.split(line_break):
+                found = (l.strip() == cmd['cli'])
+
+                # Skip prompt
+                for f in conn.get_prompt():
+                    if f.search(l):
+                        found = True
+
+                # skip filtered output
+                for f in filters:
+                    if f.search(l):
+                        found = True
+
+                # finally write line line
+                if found is not True:
+                    output.write('%s%s\n' % (prefix, l))
+        
+    conn.send('exit\r')
+    conn.close()
+
+    os.rename(conf_file_new, conf_file)
+        
+        
+    
+@cli.command(name='backup-config')
+@click.option('--threads', '-t', default=1, help='Number of threads')
+@click.pass_context
+def backup_config(ctx, threads):
+    '''Backup devices configuration'''
+
+    if not os.path.exists(ctx.obj['config']['output-dir']):
+        os.makedirs(ctx.obj['config']['output-dir'])
+    
+    from Exscript.util.start import run
+
+    run([], ctx.obj['ex_hosts'],
+        Exscript.util.decorator.bind(do_backup_config,
+                                     ctx.obj['config'],
+                                     ctx.obj['devices_config']),
+        max_threads = threads, #ctx.obj['config']['threads'],
+        verbose = ctx.obj['verbose'])
+        
+    
+if __name__ == "__main__":
+    cli(obj={})
