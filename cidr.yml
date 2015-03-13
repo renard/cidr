@@ -47,6 +47,10 @@ drivers:
       - '(Startup|Current) configuration:'
       - '.* uptime is .* seconds?'
       - '.* temperature.* deg-C$'
+      # Uptime and date seems to be stored as float and uptime seems to be
+      # computed each time the "show version" command is run. Thus the
+      # system started time may change.
+      - 'The system started at'
       - '^ver .+'
       
   foundry-mlx:
