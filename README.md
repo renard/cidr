@@ -10,6 +10,26 @@ You can check the [manpage](cidr.1.md).
 
 More documentation has to come. For now you have to read the code. Sorry guys!
 
+## install exscript
+
+You can check my
+[Launchpad page](https://launchpad.net/~renard0/+archive/ubuntu/utils/) to
+get `exscript` debian package. Please note that this package has been
+generated for `trusty` and might also work on other distos. Let me know if
+this works for you.
+
+
+Basicaly you have to put in your `/etc/apt/sources.list`:
+
+    deb http://ppa.launchpad.net/renard0/utils/ubuntu trusty main 
+
+
+and run as `root`:
+
+	apt-get update
+	apt-get install exscript
+
+
 
 ## Dependancy
 
