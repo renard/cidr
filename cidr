@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 12:57:16
+# Last changed: 2015-03-13 13:11:40
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -81,7 +81,6 @@ def parse_config(file):
         except yaml.scanner.ScannerError, e:
             error('Error found in configuration: %s\n' % e, 1)
 
-
     # Sanity checks
     if not conf.has_key('devices'):
         error('No devices found in configuration', 1)
@@ -92,6 +91,9 @@ def parse_config(file):
     for key in conf['drivers']:
         if not conf['drivers'][key].has_key('commands'):
             error('No command found for driver "%s"' % key, 1)
+        # Make sure comment is defined
+        if not conf['drivers'][key].has_key('comment'):
+            conf['drivers'][key]['comment'] = '!'
         # precompile filter regexps:
         filters = []
         if conf['drivers'][key].has_key('filters'):
@@ -99,6 +101,17 @@ def parse_config(file):
                 filters.append(re.compile(filter))
         conf['drivers'][key]['filters'] = filters
             
+
+    for device in conf['devices']:
+        name = device['name']
+        if not device.has_key('driver'):
+            error('No driver found for host "%s"\n' % name, 1)
+
+        driver = device['driver']
+        if not conf['drivers'].has_key(driver):
+            error('Cannot find driver "%s" for host "%s"\n' % \
+              (driver, name))
+
     return conf
 
 
@@ -187,32 +200,15 @@ in DEVICE_CONFIG.'''
 def do_backup_config(job, host, conn, config, devices_config):
     '''Callback function used to backup a single host configuration.'''
 
-    host_addr = host.get_address()
-    try:
-        host_driver = devices_config[host_addr]['driver']
-    except KeyError:
-        error('No driver found for host "%s"\n' % host_addr)
-        return
-    
-    try:
-        driver = config['drivers'][host_driver]
-    except KeyError:
-        error('Cannot find driver "%s" for host "%s"\n' % \
-              (host_driver, host_addr))
-        return
-
-    commands = driver['commands']
-    filters = driver['filters']
-
     if not _login(host, conn, devices_config):
         return
 
+    host_addr = host.get_address()
+    commands = driver['commands']
+    filters = driver['filters']
     conf_file = '%s' % (host_addr)
     conf_file_new = '%s.new' % conf_file
-
-    comment = '!'
-    if driver.has_key('comment'):
-        comment = driver['comment']
+    comment = driver['comment']
 
     line_break = '\r\n'
     if driver.has_key('line-break'):
