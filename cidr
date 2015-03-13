@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 12:47:30
+# Last changed: 2015-03-13 12:52:56
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -160,6 +160,30 @@ def cli(ctx, config, verbose):
         else:
             ctx.obj['verbose'] = -1
 
+def _login(host, conn, devices_config, enable='enable'):
+    '''Try to run the ENABLE command on HOST using CONN. and password as defined
+in DEVICE_CONFIG.'''
+    host_addr = host.get_address()
+
+    try:
+        conn.authenticate(host.get_account(), flush = False)
+    except Exscript.protocols.Exception.LoginFailure, e:
+        error('Cannot log into %s: %s\n' % (host_addr, e))
+        return
+
+    if devices_config[host_addr].has_key('enable') and \
+       devices_config[host_addr]['enable'] is not None:
+        conn.execute(enable)
+        try:
+            conn.app_authorize(host.account, flush = False)
+        except Exscript.protocols.Exception.LoginFailure, e:
+            error('Cannot enable on %s: %s\n' % (host_addr, e))
+            conn.send('exit\r')
+            conn.close()
+            return False
+    return True
+
+            
 def do_backup_config(job, host, conn, config, devices_config):
     '''Callback function used to backup a single host configuration.'''
 
@@ -180,24 +204,8 @@ def do_backup_config(job, host, conn, config, devices_config):
     commands = driver['commands']
     filters = driver['filters']
 
-    # enable host
-    # TODO: Move out function?
-    try:
-        conn.authenticate(host.get_account(), flush = False)
-    except Exscript.protocols.Exception.LoginFailure, e:
-        error('Cannot log into %s: %s\n' % (host_addr, e))
+    if not _login(host, conn, devices_config):
         return
-    
-    if devices_config[host_addr].has_key('enable') and \
-       devices_config[host_addr]['enable'] is not None:
-        conn.execute('enable')
-        try:
-            conn.app_authorize(host.account, flush = False)
-        except Exscript.protocols.Exception.LoginFailure, e:
-            error('Cannot enable on %s: %s\n' % (host_addr, e))
-            conn.send('exit\r')
-            conn.close()
-            return
 
     conf_file = '%s' % (host_addr)
     conf_file_new = '%s.new' % conf_file
