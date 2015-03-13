@@ -1,6 +1,12 @@
 ---
 
 output-dir: out
+threads: 16
+
+git:
+  user-name: cidr
+  user-email: cidr@example.com
+
 
 drivers:
   cisco7600:
@@ -10,7 +16,6 @@ drivers:
       - {cli: show module, quote: yes}
       - {cli: 'dir /all all-filesystems', quote: yes}
       - {cli: show vlan, quote: yes}
-      - {cli: show cdp neighbors, quote: yes}
       - {cli: show configuration}
     filters:
       - 'Using \d+ out of \d+ bytes'
@@ -21,7 +26,6 @@ drivers:
       - {cli: terminal width 0, display: no}
       - {cli: 'dir /all all-filesystems', quote: yes}
       - {cli: show vlan, quote: yes}
-      - {cli: show cdp neighbors, quote: yes}
       - {cli: show configuration}
     filters:
       - 'Using \d+ out of \d+ bytes'
@@ -34,8 +38,6 @@ drivers:
       - {cli: 'show module', quote: yes}
       - {cli: 'show flash', quote: yes}
       - {cli: 'show version', quote: yes}
-      - {cli: 'show lldp neighbors', quote: yes}
-      - {cli: 'show fdp neighbors', quote: yes}
       - {cli: 'show interface brief', quote: yes}
       - {cli: 'show conf'}
     filters:
@@ -43,6 +45,8 @@ drivers:
       - 'Disable page display mode'
       - 'Startup-config data location is .*'
       - '(Startup|Current) configuration:'
+      - '.* uptime is .* seconds?'
+      - '.* temperature.* deg-C$'
       - '^ver .+'
       
   foundry-mlx:
@@ -52,8 +56,6 @@ drivers:
       - {cli: 'show module', quote: yes}
       - {cli: 'show flash', quote: yes}
       - {cli: 'show version', quote: yes}
-      #- {cli: 'show lldp neighbors', quote: yes}
-      - {cli: 'show fdp neighbors', quote: yes}
       - {cli: 'show interface brief', quote: yes}
       - {cli: 'show conf'}
     filters:
@@ -61,6 +63,10 @@ drivers:
       - 'Disable page display mode'
       - 'Startup-config data location is .*'
       - '(Startup|Current) configuration:'
+      - '(Active|Standby) Management uptime is .* seconds?'
+      - 'LP Slot \d+ uptime is .* seconds?'
+      - '(Active|Standby|SNM|LP).*:.*\d+\.\d+C ?$'
+      - '.* temperature.* deg-C$'
       - '^ver .+'
 
   juniper-m:
@@ -73,13 +79,15 @@ drivers:
       - { cli: show chassis firmware, quote: yes}
       - { cli: show chassis fpc detail, quote: yes}
       - { cli: show chassis hardware detail, quote: yes}
-      - { cli: show chassis routing-engine, quote: yes}
       - { cli: show chassis alarms, quote: yes}
       - { cli: show system license, quote: yes}
       - { cli: show system boot-messages, quote: yes}
       - { cli: show system core-dumps, quote: yes}
       - { cli: show version detail, quote: yes}
       - { cli: show configuration}
+    filters:
+      - 'Uptime .* seconds?'
+      - '\d+ degrees C / \d+ degrees F$'
 
 # Device example
 #
