@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 00:42:19
+# Last changed: 2015-03-13 11:35:58
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -42,14 +42,32 @@ def error(message, exit=-1):
     if exit >= 0:
         sys.exit(exit)
 
-def run(cmd):
+def print_stdout(message):
+    '''Display an error MESSAGE, use EXIT as a return value if >= 0.'''
+    click.secho(message, fg='green')
+
+def print_stderr(message):
+    '''Display an error MESSAGE, use EXIT as a return value if >= 0.'''
+    click.secho(message, fg='red')
+
+def run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        debug=False):
     cmd_str = ' '.join(pipes.quote(arg) for arg in cmd)
-    proc = subprocess.Popen(cmd, stdout=False, stderr=False)
+    proc = subprocess.Popen(cmd, stdout=stdout, stderr=stderr)
     proc.wait()
-    if proc.returncode:
+    ret = { 'rc': proc.returncode,
+            'stdout': proc.stdout,
+            'stdout_str': ''.join(proc.stdout),
+            'stderr': proc.stderr,
+            'stderr_str': ''.join(proc.stderr)
+        }
+    if proc.returncode and (debug is not False and debug > 0):
         error('Cannot run %s' % cmd_str)
-        return False
-    return True
+        if proc.stdout is not []:
+            print_stdout(ret['stdout_str'])
+        if proc.stderr is not []:
+            print_stderr(ret['stderr_str'])
+    return ret
         
 
         
@@ -256,7 +274,7 @@ def backup_config(ctx, threads):
                                      ctx.obj['devices_config']),
         max_threads = threads, #ctx.obj['config']['threads'],
         verbose = ctx.obj['verbose'])
-    run(['git', 'commit', '-m', 'Autocommit'])
+    run(['git', 'commit', '-m', 'Autocommit'], debug=ctx.obj['verbose'])
 
 @cli.command()
 @click.pass_context
