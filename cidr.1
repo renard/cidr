@@ -1,0 +1,168 @@
+.TH "CIDR" "1" "" "CIDR User Manual" ""
+.SH NAME
+.PP
+cidr \- Cidr Is not as Dumb as Rancid
+.SH SYNOPSIS
+.PP
+cidr [OPTIONS] COMMAND [ARGS]...
+.SH DESCRIPTION
+.PP
+\f[I]cidr\f[] aims to be an easy to use router backup and management
+tool.
+It retrieves router and switches configuration and store them into an
+\f[I]git\f[] repository.
+Its design allow user to configure what should be backed up and how to
+do it.
+.SH OPTIONS
+.TP
+.B \-c, \-\-config \f[I]PATH\f[]
+Path to the configuration file.
+.RS
+.RE
+.TP
+.B \-v, \-\-verbose
+Run in verbose mode.
+Use multiple time to increase verbosity level.
+.RS
+.RE
+.TP
+.B \-h, \-\-help
+Display help screen.
+.RS
+.RE
+.SH COMMANDS
+.SS \f[B]backup\-config\f[]
+.PP
+Perform backup of all devices configuration.
+.PP
+This command accept following options:
+.TP
+.B \-t, \-\-threads \f[I]INTEGER\f[]:
+Maximum number of parallel job to run.
+.RS
+.RE
+.SH CONFIGURATION FILE
+.PP
+The configuration consist of a \f[C]YAML\f[] file with following keys.
+.SS \f[B]output\-dir\f[]
+.PP
+The output path where to store the configuration files This is the base
+for the \f[I]git\f[] repository.
+.SS \f[B]git\f[]
+.PP
+Handle information about \f[I]git\f[].
+.IP \[bu] 2
+\f[B]user\-name\f[]: The user name to be used for \f[I]git\f[] commits.
+.IP \[bu] 2
+\f[B]user\-email\f[]: The user email to be used for \f[I]git\f[]
+commits.
+.SS \f[B]drivers\f[]
+.PP
+A dictionary of device drivers where the key is the driver name.
+A driver consists of 3 definitions:
+.IP \[bu] 2
+\f[B]comment\f[]: character to use for comments in the configuration
+file (default: \f[I]!\f[]).
+.IP \[bu] 2
+\f[B]commands\f[]: a list of dictionary of commands to be run on device.
+Order matters since the commands will be run in the same exact order of
+their definition.
+A command is defined by:
+.RS 2
+.IP \[bu] 2
+\f[B]cli\f[]: the command to be run
+.IP \[bu] 2
+\f[B]display\f[]: boolean to determine if the command output should be
+backed up.
+By default its value is \f[I]yes\f[].
+For some commands such as \f[B]terminal length 0\f[] you don\[aq]t care
+about their output, you can safely set the \f[B]display\f[] value to
+\f[I]no\f[].
+.IP \[bu] 2
+\f[B]quote\f[]: boolean to determine if the command output should be
+prefixed by the \f[B]comment\f[] string or not.
+By default it value is \f[I]no\f[].
+You probably want to set it to \f[I]yes\f[] for non configuration
+commands such as \f[B]show version\f[].
+.RE
+.IP \[bu] 2
+\f[B]filters\f[]: a list of python compatible regular expressions to
+filter the command output.
+This is useful to remove irrelevant lines.
+.PP
+Example for the \f[I]cisco7600\f[] driver:
+.IP
+.nf
+\f[C]
+cisco7600:
+\ \ commands:
+\ \ \ \ \-\ {cli:\ terminal\ length\ 0,\ display:\ no}
+\ \ \ \ \-\ {cli:\ terminal\ width\ 0,\ display:\ no}
+\ \ \ \ \-\ {cli:\ show\ module,\ quote:\ yes}
+\ \ \ \ \-\ {cli:\ \[aq]dir\ /all\ all\-filesystems\[aq],\ quote:\ yes}
+\ \ \ \ \-\ {cli:\ show\ vlan,\ quote:\ yes}
+\ \ \ \ \-\ {cli:\ show\ configuration}
+\ \ filters:
+\ \ \ \ \-\ \[aq]Using\ \\d+\ out\ of\ \\d+\ bytes\[aq]
+\f[]
+.fi
+.SS \f[B]devices\f[]
+.PP
+A list of known devices dictionaries.
+The keys are:
+.IP \[bu] 2
+\f[B]name\f[]: the device DNS name or IP address.
+.IP \[bu] 2
+\f[B]username\f[]: the user name to log into the device.
+.IP \[bu] 2
+\f[B]password\f[]: the user password to log into the device.
+.IP \[bu] 2
+\f[B]enable\f[]: if present, send the \f[I]enable\f[] command to the
+device and use this as password.
+.IP \[bu] 2
+\f[B]protocol\f[]: protocol to use to connect to the device such as
+\f[I]ssh\f[].
+.IP \[bu] 2
+\f[B]driver\f[]: the defined driver to use for that device.
+.IP \[bu] 2
+\f[B]same\-as\f[]: List of other devices that has the exact same
+configuration.
+.PP
+Examples:
+.IP
+.nf
+\f[C]
+\-\ name:\ c7600.example.com
+\ \ username:\ cird
+\ \ password:\ password\-for\-cidr
+\ \ enable:\ enable\-password
+\ \ protocol:\ ssh
+\ \ driver:\ cisco7600
+
+\-\ name:\ sw1.example.com
+\ \ username:\ cidr
+\ \ password:\ password\-for\-cird
+\ \ driver:\ foundry\-fls
+\ \ protocol:\ ssh
+\ \ same\-as:
+\ \ \ \ \-\ sw2.example.com
+\ \ \ \ \-\ sw3.example.com
+\ \ \ \ \-\ sw4.example.com
+\f[]
+.fi
+.SH SEE ALSO
+.IP \[bu] 2
+Exscript (https://github.com/knipknap/exscript/): the connection library
+used by \f[I]cidr\f[].
+.SH AUTHORS
+.PP
+\f[I]cidr\f[] is written by Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
+(\f[B]\@renard_0\f[]).
+.SH COPYRIGHT
+.PP
+Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>.
+.PP
+Released under WTFPL version 2 or
+higher (http://sam.zoy.org/wtfpl/COPYING).
+.SH AUTHORS
+March 13, 2015.
