@@ -6,6 +6,8 @@
 
 This is an early stage.
 
+You can check the [manpage](cidr.1.md).
+
 More documentation has to come. For now you have to read the code. Sorry guys!
 
 
