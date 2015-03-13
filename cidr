@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 13:11:40
+# Last changed: 2015-03-13 13:14:22
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -203,10 +203,7 @@ def do_backup_config(job, host, conn, config, devices_config):
     if not _login(host, conn, devices_config):
         return
 
-    host_addr = host.get_address()
-    commands = driver['commands']
-    filters = driver['filters']
-    conf_file = '%s' % (host_addr)
+    conf_file = '%s' % (host.get_address())
     conf_file_new = '%s.new' % conf_file
     comment = driver['comment']
 
@@ -216,7 +213,7 @@ def do_backup_config(job, host, conn, config, devices_config):
     
         
     with file(conf_file_new, 'w+') as output:
-        for cmd in commands:
+        for cmd in driver['commands']:
             conn.response = None
             conn.execute(cmd['cli'])
             conn.waitfor(conn.get_prompt())
@@ -242,7 +239,7 @@ def do_backup_config(job, host, conn, config, devices_config):
                         found = True
 
                 # skip filtered output
-                for f in filters:
+                for f in driver['filters']:
                     if f.search(l):
                         found = True
 
@@ -284,5 +281,14 @@ def backup_config(ctx, threads):
         verbose = ctx.obj['verbose'])
     run(['git', 'commit', '-m', 'Autocommit'], debug=ctx.obj['verbose'])
 
+@cli.command(name='script')
+#@click.option('--', '-t', default=1, help='Number of threads')
+@click.pass_context
+def script(ctx):
+    '''Run script on devices.'''
+    pass
+
+
+    
 if __name__ == "__main__":
     cli(obj={})
