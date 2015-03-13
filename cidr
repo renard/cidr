@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 13:14:22
+# Last changed: 2015-03-13 15:21:03
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -205,6 +205,7 @@ def do_backup_config(job, host, conn, config, devices_config):
 
     conf_file = '%s' % (host.get_address())
     conf_file_new = '%s.new' % conf_file
+    driver = config['drivers'][devices_config[host.get_address()]['driver']]
     comment = driver['comment']
 
     line_break = '\r\n'
