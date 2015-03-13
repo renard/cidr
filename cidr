@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 11:35:58
+# Last changed: 2015-03-13 12:47:30
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -263,6 +263,10 @@ def backup_config(ctx, threads):
 
     if not os.path.exists(ctx.obj['config']['output-dir']):
         os.makedirs(ctx.obj['config']['output-dir'])
+        run(['git', 'init'])
+        run(['git', 'config', 'user.name', ctx.obj['config']['git']['user-name']])
+        run(['git', 'config', 'user.email', ctx.obj['config']['git']['user-email']])
+
     os.chdir(ctx.obj['config']['output-dir'])
     
     import Exscript.util.start
@@ -276,20 +280,5 @@ def backup_config(ctx, threads):
         verbose = ctx.obj['verbose'])
     run(['git', 'commit', '-m', 'Autocommit'], debug=ctx.obj['verbose'])
 
-@cli.command()
-@click.pass_context
-def init(ctx):
-    '''Initialize directory'''
-
-    if not os.path.exists(ctx.obj['config']['output-dir']):
-        os.makedirs(ctx.obj['config']['output-dir'])
-    os.chdir(ctx.obj['config']['output-dir'])
-    run(['git', 'init'])
-    run(['git', 'config', 'user.name', ctx.obj['config']['git']['user-name']])
-    run(['git', 'config', 'user.email', ctx.obj['config']['git']['user-email']])
-
-
-    
-    
 if __name__ == "__main__":
     cli(obj={})
