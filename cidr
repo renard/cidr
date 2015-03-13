@@ -173,7 +173,7 @@ def cli(ctx, config, verbose):
         else:
             ctx.obj['verbose'] = -1
 
-def _login(host, conn, devices_config, enable='enable'):
+def _login(host, conn, config, devices_config, enable='enable'):
     '''Try to run the ENABLE command on HOST using CONN. and password as defined
 in DEVICE_CONFIG.'''
     host_addr = host.get_address()
@@ -194,13 +194,17 @@ in DEVICE_CONFIG.'''
             conn.send('exit\r')
             conn.close()
             return False
+    if config['drivers'][devices_config[host_addr]['driver']].has_key('term-setup'):
+        for l in config['drivers'][devices_config[host_addr]['driver']]['term-setup']:
+            conn.execute(l)
+            conn.waitfor(conn.get_prompt())
     return True
 
             
 def do_backup_config(job, host, conn, config, devices_config):
     '''Callback function used to backup a single host configuration.'''
 
-    if not _login(host, conn, devices_config):
+    if not _login(host, conn, config, devices_config):
         return
 
     conf_file = '%s' % (host.get_address())

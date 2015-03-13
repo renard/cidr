@@ -67,6 +67,8 @@ consists of 3 definitions:
 - **comment**: character to use for comments in the configuration file
   (default: *!*).
 
+- **term-setup**: An optional list of command to be run to setup terminal.
+
 - **commands**: a list of dictionary of commands to be run on device. Order
   matters since the commands will be run in the same exact order of their
   definition. A command is defined by:

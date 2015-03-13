@@ -10,9 +10,10 @@ git:
 
 drivers:
   cisco7600:
+    term-setup:
+      - terminal length 0
+      - terminal width 0
     commands:
-      - {cli: terminal length 0, display: no}
-      - {cli: terminal width 0, display: no}
       - {cli: show module, quote: yes}
       - {cli: 'dir /all all-filesystems', quote: yes}
       - {cli: show vlan, quote: yes}
@@ -21,9 +22,10 @@ drivers:
       - 'Using \d+ out of \d+ bytes'
 
   cisco-catalyst:
+    term-setup:
+      - terminal length 0
+      - terminal width 0
     commands:
-      - {cli: terminal length 0, display: no}
-      - {cli: terminal width 0, display: no}
       - {cli: 'dir /all all-filesystems', quote: yes}
       - {cli: show vlan, quote: yes}
       - {cli: show configuration}
@@ -32,8 +34,9 @@ drivers:
 
       
   foundry-fls:
+    term-setup:
+      - skip-page-display
     commands:
-      - {cli: 'skip-page-display', display: no}
       - {cli: 'show chassis', quote: yes}
       - {cli: 'show module', quote: yes}
       - {cli: 'show flash', quote: yes}
@@ -54,8 +57,9 @@ drivers:
       - '^ver .+'
       
   foundry-mlx:
+    term-setup:
+      - skip-page-display
     commands:
-      - {cli: 'skip-page-display', display: no}
       - {cli: 'show chassis', quote: yes}
       - {cli: 'show module', quote: yes}
       - {cli: 'show flash', quote: yes}
@@ -75,10 +79,11 @@ drivers:
 
   juniper-m:
     comment: '#'
+    term-setup:
+      - 'set cli screen-length 0'
+      - 'set cli screen-width 0'
+      - 'set cli terminal ansi'
     commands:
-      - { cli: 'set cli screen-length 0', display: no}
-      - { cli: 'set cli screen-width 0', display: no}
-      - { cli: 'set cli terminal ansi', display: no}
       - { cli: show chassis environment, quote: yes}
       - { cli: show chassis firmware, quote: yes}
       - { cli: show chassis fpc detail, quote: yes}
