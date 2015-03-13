@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-12 22:50:08
+# Last changed: 2015-03-13 00:42:19
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -29,7 +29,12 @@ import click
 import sys
 import os
 import re
+import subprocess
+import pipes
+import time
+import threading
 
+lock = threading.Lock()
 
 def error(message, exit=-1):
     '''Display an error MESSAGE, use EXIT as a return value if >= 0.'''
@@ -37,6 +42,17 @@ def error(message, exit=-1):
     if exit >= 0:
         sys.exit(exit)
 
+def run(cmd):
+    cmd_str = ' '.join(pipes.quote(arg) for arg in cmd)
+    proc = subprocess.Popen(cmd, stdout=False, stderr=False)
+    proc.wait()
+    if proc.returncode:
+        error('Cannot run %s' % cmd_str)
+        return False
+    return True
+        
+
+        
 def parse_config(file):
     '''Parse YAML configuration FILE and return a dict'''
     if not os.path.exists(file):
@@ -103,7 +119,7 @@ def generate_access(config):
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('--config',
+@click.option('--config', '-c',
               type=click.Path(exists=True),
               default='cidr.yml',
               help='Configuration file')
@@ -165,7 +181,7 @@ def do_backup_config(job, host, conn, config, devices_config):
             conn.close()
             return
 
-    conf_file = '%s/%s' % (config['output-dir'], host_addr)
+    conf_file = '%s' % (host_addr)
     conf_file_new = '%s.new' % conf_file
 
     comment = '!'
@@ -216,6 +232,8 @@ def do_backup_config(job, host, conn, config, devices_config):
     conn.close()
 
     os.rename(conf_file_new, conf_file)
+    with lock:
+        run(['git', 'add', conf_file])
         
         
     
@@ -227,16 +245,33 @@ def backup_config(ctx, threads):
 
     if not os.path.exists(ctx.obj['config']['output-dir']):
         os.makedirs(ctx.obj['config']['output-dir'])
+    os.chdir(ctx.obj['config']['output-dir'])
     
-    from Exscript.util.start import run
+    import Exscript.util.start
 
-    run([], ctx.obj['ex_hosts'],
+    Exscript.util.start.run(
+        [], ctx.obj['ex_hosts'],
         Exscript.util.decorator.bind(do_backup_config,
                                      ctx.obj['config'],
                                      ctx.obj['devices_config']),
         max_threads = threads, #ctx.obj['config']['threads'],
         verbose = ctx.obj['verbose'])
-        
+    run(['git', 'commit', '-m', 'Autocommit'])
+
+@cli.command()
+@click.pass_context
+def init(ctx):
+    '''Initialize directory'''
+
+    if not os.path.exists(ctx.obj['config']['output-dir']):
+        os.makedirs(ctx.obj['config']['output-dir'])
+    os.chdir(ctx.obj['config']['output-dir'])
+    run(['git', 'init'])
+    run(['git', 'config', 'user.name', ctx.obj['config']['git']['user-name']])
+    run(['git', 'config', 'user.email', ctx.obj['config']['git']['user-email']])
+
+
+    
     
 if __name__ == "__main__":
     cli(obj={})
