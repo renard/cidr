@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 12:52:56
+# Last changed: 2015-03-13 12:57:16
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -144,7 +144,7 @@ def generate_access(config):
 @click.option('--verbose', '-v', default=0, count=True, help='verbose output')
 @click.pass_context
 def cli(ctx, config, verbose):
-
+    '''Manage network devices and backup their configuration.'''
     
     if config is not None:
         ctx.obj['config'] = parse_config(config)
