@@ -40,6 +40,14 @@ This command accept following options:
 -t, \--threads *INTEGER*:
 ~    Maximum number of parallel job to run.
 
+## **script**
+
+cidr \[OPTIONS\] script HOSTS SCRIPT
+
+Run *SCRIPT* on *HOSTS*. *SCRIPT* can be a path to an existing file or *-*
+for standard input. *HOSTS* is an *fnmatch* pattern to be matched against
+all device names.
+
 
 # CONFIGURATION FILE
 

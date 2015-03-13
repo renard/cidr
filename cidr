@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 15:21:03
+# Last changed: 2015-03-13 16:46:15
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -24,6 +24,7 @@ __copyright__ = """Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖ
 
 
 import Exscript
+import Exscript.util.start
 import yaml
 import click
 import sys
@@ -33,6 +34,7 @@ import subprocess
 import pipes
 import time
 import threading
+import fnmatch
 
 lock = threading.Lock()
 
@@ -275,8 +277,6 @@ def backup_config(ctx, threads):
 
     os.chdir(ctx.obj['config']['output-dir'])
     
-    import Exscript.util.start
-
     Exscript.util.start.run(
         [], ctx.obj['ex_hosts'],
         Exscript.util.decorator.bind(do_backup_config,
@@ -286,14 +286,57 @@ def backup_config(ctx, threads):
         verbose = ctx.obj['verbose'])
     run(['git', 'commit', '-m', 'Autocommit'], debug=ctx.obj['verbose'])
 
-@cli.command(name='script')
-#@click.option('--', '-t', default=1, help='Number of threads')
-@click.pass_context
-def script(ctx):
-    '''Run script on devices.'''
-    pass
+
+def do_script(job, host, conn, config, devices_config, script):
+    '''Callback function used to backup a single host configuration.'''
+
+    if not _login(host, conn, config, devices_config):
+        return
+
+
+    for l in script:
+        conn.response = None
+        #print "! >> '%s'" % l
+        conn.execute(l)
+        #print "! >> '%s' DONE" % l
+        conn.waitfor(conn.get_prompt())
+        #print "! >> '%s' DONE PROMPT" % l
+        print conn.response
+
+    conn.send('exit\r')
+    conn.close()
+
 
 
     
+@cli.command(name='script')
+@click.argument('host')
+@click.argument('script')
+@click.pass_context
+def script(ctx, host, script):
+    '''Run SCRIPT on devices. If SCRIPT is "-", use stdin.'''
+    if script != '-' and not os.path.exists(script):
+        error('Cannot open "%s" as script' % script, 1)
+        
+    with click.open_file(script, 'r') as f:
+        lines = f.read().split('\n')
+
+    run_host = []
+    for ex_host in ctx.obj['ex_hosts']:
+        if fnmatch.fnmatch(ex_host.get_address(), host):
+            run_host.append(ex_host)
+        
+    Exscript.util.start.run(
+        [], run_host,
+        Exscript.util.decorator.bind(do_script,
+                                     ctx.obj['config'],
+                                     ctx.obj['devices_config'],
+                                     lines),
+        max_threads = 64,
+        verbose = ctx.obj['verbose'])
+
+    #     print script
+    # print lines
+
 if __name__ == "__main__":
     cli(obj={})

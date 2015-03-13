@@ -41,6 +41,15 @@ This command accept following options:
 Maximum number of parallel job to run.
 .RS
 .RE
+.SS \f[B]script\f[]
+.PP
+cidr [OPTIONS] script HOSTS SCRIPT
+.PP
+Run \f[I]SCRIPT\f[] on \f[I]HOSTS\f[].
+\f[I]SCRIPT\f[] can be a path to an existing file or \f[I]\-\f[] for
+standard input.
+\f[I]HOSTS\f[] is an \f[I]fnmatch\f[] pattern to be matched against all
+device names.
 .SH CONFIGURATION FILE
 .PP
 The configuration consist of a \f[C]YAML\f[] file with following keys.
