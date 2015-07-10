@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-03-13 16:46:15
+# Last changed: 2015-07-10 15:03:09
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -257,16 +257,37 @@ def do_backup_config(job, host, conn, config, devices_config):
     conn.send('exit\r')
     conn.close()
 
-    os.rename(conf_file_new, conf_file)
-    with lock:
-        run(['git', 'add', conf_file])
+    if conf_file_new != '/dev/stdout':
+        os.rename(conf_file_new, conf_file)
+        with lock:
+            run(['git', 'add', conf_file])
+            
+
+def host_limit(hosts, limit=None):
+    '''Return only HOSTS matching LIMIT using FNMATCH algorithm.
+
+HOSTS is a list of Exscript.Host.Host objects.
+LIMIT is a string or list of hostname patterns strings.
+'''
+    if limit is None or len(limit) == 0:
+        return hosts
+    if type(limit) != list and type(limit) != tuple:
+        limit = [ limit ]
+
+    ret = []
+    for limit_pattern in limit:
+        for host in hosts:
+            if fnmatch.fnmatch(host.get_address(), limit_pattern):
+                ret.append(host)
+    return ret
         
         
     
 @cli.command(name='backup-config')
 @click.option('--threads', '-t', default=1, help='Number of threads')
+@click.option('--limit', '-l', default=None, multiple=True, help='Host limit')
 @click.pass_context
-def backup_config(ctx, threads):
+def backup_config(ctx, threads, limit):
     '''Backup devices configuration'''
 
     if not os.path.exists(ctx.obj['config']['output-dir']):
@@ -276,14 +297,18 @@ def backup_config(ctx, threads):
         run(['git', 'config', 'user.email', ctx.obj['config']['git']['user-email']])
 
     os.chdir(ctx.obj['config']['output-dir'])
-    
+
+    # limit to host
+    run_host = host_limit(ctx.obj['ex_hosts'], limit)
+
     Exscript.util.start.run(
-        [], ctx.obj['ex_hosts'],
+        [], run_host,
         Exscript.util.decorator.bind(do_backup_config,
                                      ctx.obj['config'],
                                      ctx.obj['devices_config']),
         max_threads = threads, #ctx.obj['config']['threads'],
         verbose = ctx.obj['verbose'])
+
     run(['git', 'commit', '-m', 'Autocommit'], debug=ctx.obj['verbose'])
 
 
@@ -321,10 +346,8 @@ def script(ctx, host, script):
     with click.open_file(script, 'r') as f:
         lines = f.read().split('\n')
 
-    run_host = []
-    for ex_host in ctx.obj['ex_hosts']:
-        if fnmatch.fnmatch(ex_host.get_address(), host):
-            run_host.append(ex_host)
+    # limit to host
+    run_host = host_limit(ctx.obj['ex_hosts'], host)
         
     Exscript.util.start.run(
         [], run_host,
