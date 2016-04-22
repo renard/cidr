@@ -340,7 +340,7 @@ LIMIT is a string or list of hostname patterns strings.
         
     
 @cli.command(name='backup-config')
-@click.option('--threads', '-t', default=1, help='Number of threads')
+@click.option('--threads', '-t', default=None, help='Number of threads')
 @click.option('--limit', '-l', default=None, multiple=True, help='Host limit')
 @click.pass_context
 def backup_config(ctx, threads, limit):
@@ -357,6 +357,12 @@ def backup_config(ctx, threads, limit):
     # limit to host
     run_host = host_limit(ctx.obj['ex_hosts'], limit)
 
+    if threads is None:
+        if ctx.obj['config']['threads'] is None:
+            threads = 1
+        else:
+            threads = ctx.obj['config']['threads']
+    
     Exscript.util.start.run(
         [], run_host,
         Exscript.util.decorator.bind(do_backup_config,
@@ -391,10 +397,11 @@ def do_script(job, host, conn, config, devices_config, script):
 
     
 @cli.command(name='script')
+@click.option('--threads', '-t', default=None, help='Number of threads')
 @click.argument('host', nargs=-1)
 @click.argument('script')
 @click.pass_context
-def script(ctx, host, script):
+def script(ctx, threads, host, script):
     '''Run SCRIPT on devices. If SCRIPT is "-", use stdin.'''
     if script != '-' and not os.path.exists(script):
         error('Cannot open "%s" as script' % script, 1)
@@ -404,6 +411,11 @@ def script(ctx, host, script):
 
     # limit to host
     run_host = host_limit(ctx.obj['ex_hosts'], host)
+    if threads is None:
+        if ctx.obj['config']['threads'] is None:
+            threads = 1
+        else:
+            threads = ctx.obj['config']['threads']
         
     Exscript.util.start.run(
         [], run_host,
@@ -411,7 +423,7 @@ def script(ctx, host, script):
                                      ctx.obj['config'],
                                      ctx.obj['devices_config'],
                                      lines),
-        max_threads = 64,
+        max_threads = threads,
         verbose = ctx.obj['verbose'])
 
     #     print script
