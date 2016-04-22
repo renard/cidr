@@ -1,0 +1,5 @@
+! Foundry passwords are encrypted MD5 hashes with a 8-char salt.
+configure terminal
+username john privilege 0 password 8 $1$12345678$o2n/JiO/h5VviOInWJ4OQ/
+exit
+write memory

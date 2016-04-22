@@ -1,0 +1,5 @@
+! Cisco passwords are encrypted MD5 hashes with a 4-char salt.
+configure terminal
+username john privilege 15 secret 5 $1$1234$dt6poks4FkXbZqcz7Wacm/
+exit
+write memory

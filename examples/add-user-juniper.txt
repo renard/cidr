@@ -1,0 +1,7 @@
+# Juniper passwords are encrypted MD5 hashes with a 8-char salt.
+configure
+set system login user john uid 1001
+set system login user john class admin
+set system login user john authentication encrypted-password "$1$12345678$o2n/JiO/h5VviOInWJ4OQ/"
+commit
+exit
