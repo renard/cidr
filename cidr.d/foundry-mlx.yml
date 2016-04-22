@@ -1,0 +1,48 @@
+drivers:
+  foundry-mlx:
+    term-setup:
+      - skip-page-display
+    commands:
+      - {cli: 'show chassis', quote: yes}
+      - {cli: 'show module', quote: yes}
+      - {cli: 'show flash', quote: yes}
+      - {cli: 'show version', quote: yes}
+      - {cli: 'show interface brief', quote: yes}
+      - {cli: 'show mpls vll', quote: yes}
+      - {cli: 'show conf'}
+    filters:
+      - 'skip-page-display'
+      - 'Disable page display mode'
+      - 'Startup-config data location is .*'
+      - '(Startup|Current) configuration:'
+      - '(Active|Standby) Management uptime is .* seconds?'
+      - 'LP Slot \d+ uptime is .* seconds?'
+      - '(Active|Standby|SNM|LP).*:.*\d+\.\d+C ?$'
+      - '.* temperature.* deg-C$'
+      - '^ver .+'
+      - 'Switch Fabric Module .* Up Time is '
+      - '^SFM\d+: FE\d+:'
+      - 'Total power '
+      - '^(left|right) fan tray'
+  juniper-m:
+    comment: '#'
+    term-setup:
+      - 'set cli screen-length 0'
+      - 'set cli screen-width 0'
+      - 'set cli terminal ansi'
+    commands:
+      - { cli: show chassis environment, quote: yes}
+      - { cli: show chassis firmware, quote: yes}
+      - { cli: show chassis fpc detail, quote: yes}
+      - { cli: show chassis hardware detail, quote: yes}
+      - { cli: show chassis alarms, quote: yes}
+      - { cli: show system license, quote: yes}
+      - { cli: show system boot-messages, quote: yes}
+      - { cli: show system core-dumps, quote: yes}
+      - { cli: show version detail, quote: yes}
+      - {cli: 'show l2circuit connections', quote: yes}
+      - { cli: show configuration}
+    filters:
+      - 'Uptime .* (day|hour|minute|second)s?.*'
+      - '\d+ degrees C / \d+ degrees F$'
+      - 'Temperature +\d+'

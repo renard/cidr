@@ -1,0 +1,23 @@
+drivers:
+  foundry-fls:
+    term-setup:
+      - skip-page-display
+    commands:
+      - {cli: 'show chassis', quote: yes}
+      - {cli: 'show module', quote: yes}
+      - {cli: 'show flash', quote: yes}
+      - {cli: 'show version', quote: yes}
+      - {cli: 'show interface brief', quote: yes}
+      - {cli: 'show conf'}
+    filters:
+      - 'skip-page-display'
+      - 'Disable page display mode'
+      - 'Startup-config data location is .*'
+      - '(Startup|Current) configuration:'
+      - '.* uptime is .* seconds?'
+      - '.* temperature.* deg-C$'
+      # Uptime and date seems to be stored as float and uptime seems to be
+      # computed each time the "show version" command is run. Thus the
+      # system started time may change.
+      - 'The system started at'
+      - '^ver .+'
