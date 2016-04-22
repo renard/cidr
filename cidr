@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2015-07-10 15:03:09
+# Last changed: 2016-04-22 14:14:22
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -35,7 +35,9 @@ import pipes
 import time
 import threading
 import fnmatch
-
+import prettytable
+ 
+ 
 lock = threading.Lock()
 
 def error(message, exit=-1):
@@ -140,7 +142,7 @@ def generate_access(config):
                                         password=device['password'],
                                         password2=_enable)
                 
-                
+            _host.set('driver', device['driver'])
             _host.set_account(_account)
             ex_hosts.append(_host)
             ex_accounts.append(_account)
@@ -361,5 +363,24 @@ def script(ctx, host, script):
     #     print script
     # print lines
 
+
+@cli.command(name='list-hosts')
+@click.pass_context
+def list_hosts(ctx):
+    '''List all known hosts.'''
+    
+    table = prettytable.PrettyTable(['protocol', 'port', 'login', 'enable',
+                                     'name', 'driver'])
+    
+    for h in ctx.obj['ex_hosts']:
+        auth = ''
+        if h.account.authorization_password:
+            auth = '*'
+        table.add_row([h.protocol, h.tcp_port, h.account.name,auth,
+                       h.name, h.get('driver')])
+
+    print table
+
+    
 if __name__ == "__main__":
     cli(obj={})
