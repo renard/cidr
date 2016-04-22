@@ -1,5 +1,14 @@
-% CIDR(1) CIDR User Manual
-% March 13, 2015
+---
+title: cidr
+section: 1
+header: User manual
+footer: cidr
+author:
+  - Sébastien Gross  &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt; (**@renard_0**)
+date: 2016-04-22 16:49:06
+adjusting: b
+hyphenate: yes
+---
 
 # NAME
 
@@ -19,15 +28,13 @@ how to do it.
 # OPTIONS
 
 -c, \--config *PATH*
-
-~   Path to the configuration file.
+: Path to the configuration file.
 
 -v, \--verbose
-
-~   Run in verbose mode. Use multiple time to increase verbosity level.
+: Run in verbose mode. Use multiple time to increase verbosity level.
 
 -h, \--help
-~   Display help screen.
+: Display help screen.
 
 # COMMANDS
 
@@ -37,12 +44,12 @@ Perform backup of all devices configuration.
 
 This command accept following options:
 
--t, \--threads *INTEGER*:
-~    Maximum number of parallel job to run.
+-t, \--threads *INTEGER*
+: Maximum number of parallel job to run.
 
 ## **script**
 
-cidr \[OPTIONS\] script HOSTS SCRIPT
+cidr \[OPTIONS\] script HOSTS \[HOSTS\] SCRIPT
 
 Run *SCRIPT* on *HOSTS*. *SCRIPT* can be a path to an existing file or *-*
 for standard input. *HOSTS* is an *fnmatch* pattern to be matched against
@@ -51,7 +58,14 @@ all device names.
 
 # CONFIGURATION FILE
 
-The configuration consist of a `YAML` file with following keys.
+The configuration consist of a set of `YAML` files with following keys.
+
+## **include**
+
+A list of extra files to me included. Each item is a glob pattern.
+
+    include:
+      - cidr.d/*.yml
 
 ## **output-dir**
 
@@ -145,11 +159,6 @@ Examples:
 
 - [Exscript](https://github.com/knipknap/exscript/): the connection library
   used by *cidr*.
-
-
-# AUTHORS
-
-*cidr* is written by Sébastien Gross &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt; (**@renard_0**).
 
 # COPYRIGHT
 
