@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2016-04-22 16:09:32
+# Last changed: 2017-10-18 17:55:07
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -238,7 +238,7 @@ in DEVICE_CONFIG.'''
 
     try:
         conn.authenticate(host.get_account(), flush = False)
-    except Exscript.protocols.Exception.LoginFailure, e:
+    except Exscript.protocols.exception.LoginFailure, e:
         error('Cannot log into %s: %s\n' % (host_addr, e))
         return
 
@@ -247,7 +247,7 @@ in DEVICE_CONFIG.'''
         conn.execute(enable)
         try:
             conn.app_authorize(host.account, flush = False)
-        except Exscript.protocols.Exception.LoginFailure, e:
+        except Exscript.protocols.exception.LoginFailure, e:
             error('Cannot enable on %s: %s\n' % (host_addr, e))
             conn.send('exit\r')
             conn.close()
