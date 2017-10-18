@@ -1,5 +1,5 @@
 drivers:
-  juniper-m:
+  juniper-mx:
     comment: '#'
     term-setup:
       - 'set cli screen-length 0'
