@@ -10,7 +10,7 @@ Easy network management tool
 
 # Copyright © 2015 Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 # Created: 2015-03-12
-# Last changed: 2017-10-18 17:55:07
+# Last changed: 2017-10-19 12:34:51
 
 # This program is free software. It comes without any warranty, to
 # the extent permitted by applicable law. You can redistribute it
@@ -190,13 +190,28 @@ def generate_access(config):
 
         for host in hosts:
             _host = Exscript.Host('%s://%s' % (device['protocol'], host))
+
+            _key = None
+            if device.has_key('key') and device['key'] is not None:
+                _key_password = None
+                _key_type = None
+                if device.has_key('key-password') and device['key-password'] is not None:
+                    _key_password = device['key-password']
+                    _key_type = 'rsa'
+                    if device.has_key('key-type') and device['key-type'] is not None:
+                        _key_type = device['key-type']
+                _key = Exscript.PrivateKey.from_file(device['key'], password=_key_password, keytype='rsa')
+
+            _password = None
+            if device.has_key('password') and device['password'] is not None:
+                _password = device['password']
             _enable = None
             if device.has_key('enable') and device['enable'] is not None:
                 _enable = device['enable']
             _account = Exscript.Account(device['username'],
-                                        password=device['password'],
+                                        key=_key,
+                                        password=_password,
                                         password2=_enable)
-                
             _host.set('driver', device['driver'])
             _host.set_account(_account)
             # force IPv4 if required
