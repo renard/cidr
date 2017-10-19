@@ -234,8 +234,7 @@ def cli(ctx, config, verbose):
 def _login(host, conn, config, devices_config, enable='enable'):
     '''Try to run the ENABLE command on HOST using CONN. and password as defined
 in DEVICE_CONFIG.'''
-    host_addr = host.get_address()
-
+    host_addr = host.get_name()
     try:
         conn.authenticate(host.get_account(), flush = False)
     except Exscript.protocols.exception.LoginFailure, e:
@@ -265,9 +264,9 @@ def do_backup_config(job, host, conn, config, devices_config):
     if not _login(host, conn, config, devices_config):
         return
 
-    conf_file = '%s' % (host.get_address())
+    conf_file = '%s' % (host.get_name())
     conf_file_new = '%s.new' % conf_file
-    driver = config['drivers'][devices_config[host.get_address()]['driver']]
+    driver = config['drivers'][devices_config[host.get_name()]['driver']]
     comment = driver['comment']
 
     line_break = '\r\n'
@@ -333,7 +332,7 @@ LIMIT is a string or list of hostname patterns strings.
     ret = []
     for limit_pattern in limit:
         for host in hosts:
-            if fnmatch.fnmatch(host.get_address(), limit_pattern):
+            if fnmatch.fnmatch(host.get_name(), limit_pattern):
                 ret.append(host)
     return ret
         
