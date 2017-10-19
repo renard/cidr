@@ -5,7 +5,7 @@ header: User manual
 footer: cidr
 author:
   - Sébastien Gross  &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt; (**@renard_0**)
-date: 2016-04-22 16:49:06
+date: 2017-10-19 15:25:58
 adjusting: b
 hyphenate: yes
 ---
@@ -127,9 +127,14 @@ A list of known devices dictionaries. The keys are:
 
 - **name**: the device DNS name or IP address.
 - **username**: the user name to log into the device.
+- **key**: path to a ssh private key.
+- **key-password**: the password for encrypted private ssh key.
+- **key-type**: type of ssh private key (default to `rsa`).
 - **password**: the user password to log into the device.
 - **enable**: if present, send the *enable* command to the device and use
   this as password.
+- **force-IPv4**: force IPv4 usage if a hostname resolves to both IPv6 and
+  IPv4 and you don't want to use IPv6.
 - **protocol**: protocol to use to connect to the device such as *ssh*.
 - **driver**: the defined driver to use for that device.
 - **same-as**: List of other devices that has the exact same configuration.
@@ -138,7 +143,7 @@ A list of known devices dictionaries. The keys are:
 Examples:
 
     - name: c7600.example.com
-      username: cird
+      username: cidr
       password: password-for-cidr
       enable: enable-password
       protocol: ssh
@@ -146,7 +151,7 @@ Examples:
 
     - name: sw1.example.com
       username: cidr
-      password: password-for-cird
+      password: password-for-cidr
       driver: foundry-fls
       protocol: ssh
       same-as:
@@ -162,6 +167,6 @@ Examples:
 
 # COPYRIGHT
 
-Copyright © 2015 Sébastien Gross &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt;.
+Copyright © 2015-2017 Sébastien Gross &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt;.
 
 Released under [WTFPL version 2 or higher](http://sam.zoy.org/wtfpl/COPYING).
