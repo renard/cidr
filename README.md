@@ -62,3 +62,10 @@ Here is a list of devices on witch `cidr` has been successfully run.
 * Juniper
   * MX80
   * Ex4550 Series
+
+* Oracle
+  * Acme Packet Net-Net 3820 SBC
+
+
+Please note that for some devices (suche as Acme Packet) The configuration
+cannot be reimported as it.
