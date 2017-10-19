@@ -37,7 +37,8 @@ import threading
 import fnmatch
 import prettytable
 import glob 
- 
+import socket
+
 lock = threading.Lock()
 
 def error(message, exit=-1):
@@ -198,6 +199,11 @@ def generate_access(config):
                 
             _host.set('driver', device['driver'])
             _host.set_account(_account)
+            try:
+                _host.set_address(socket.gethostbyname(_host.get_address()))
+            except socket.gaierror:
+                error("Could not resolve %s. Skipping" % _host.get_address())
+                continue
             ex_hosts.append(_host)
             ex_accounts.append(_account)
             devices_config[host] = device
