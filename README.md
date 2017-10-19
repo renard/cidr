@@ -44,7 +44,9 @@ Configure `cidr.yml` file with devices and run:
 
 # Supported devices
 
-Here is a list of devices on witch `cidr` has been successfully run.
+Here is a list of devices on witch `cidr` has been successfuly run. Some
+other may work as well. Please let me know if you have other working
+devices.
 
 * Cisco
   * 7600 Series
