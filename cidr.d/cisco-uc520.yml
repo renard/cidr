@@ -1,0 +1,15 @@
+drivers:
+  cisco-uc520:
+    term-setup:
+      - terminal length 0
+      - terminal width 0
+    commands:
+      - {cli: show inventory, quote: yes}
+      - {cli: 'dir /all all-filesystems', quote: yes}
+      - {cli: show vlans, quote: yes}
+      - {cli: show vlan-switch, quote: yes}
+      - {cli: show access-lists, quote: yes }
+      - {cli: show vtp status, quote: yes }
+      - {cli: show running-config all}
+    filters:
+      - 'Using \d+ out of \d+ bytes'

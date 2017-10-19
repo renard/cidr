@@ -1,0 +1,10 @@
+drivers:
+  dell-pcm6220:
+    term-setup:
+      - terminal length 0
+    commands:
+      - {cli: show version, quote: yes}
+      - {cli: show vlan, quote: yes}
+      - {cli: show running-config all}
+    filters:
+      - 'Using \d+ out of \d+ bytes'

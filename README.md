@@ -41,3 +41,24 @@ and run as `root`:
 Configure `cidr.yml` file with devices and run:
 
     ./cidr.py -v --config cidr.yml backup-config -t 64
+
+# Supported devices
+
+Here is a list of devices on witch `cidr` has been successfully run.
+
+* Cisco
+  * 7600 Series
+  * ASR9K Series
+  * C2960X Series
+  * UC520 Series
+
+* Dell
+  * PowerConnect M6220
+
+* Foundry
+  * MLX NetIron
+  * FLS FLS-48G
+
+* Juniper
+  * MX80
+  * Ex4550 Series

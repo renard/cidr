@@ -1,0 +1,18 @@
+drivers:
+  cisco-asr:
+    term-setup:
+      - terminal length 0
+      - terminal width 0
+    commands:
+      - {cli: show version, quote: yes }
+      # - {cli: show inventory, quote: yes}
+      # - {cli: show module, quote: yes}
+      # - {cli: 'dir /all all-filesystems', quote: yes}
+      # - {cli: show vlan, quote: yes}
+      - {cli: show license, quote: yes }
+      - {cli: show running-config }
+      - {cli: admin, quote: yes }
+      - {cli: show running-config }
+    filters:
+      - '.* UTC'
+      - 'Using \d+ out of \d+ bytes'
