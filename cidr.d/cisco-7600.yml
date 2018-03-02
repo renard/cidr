@@ -1,5 +1,5 @@
 drivers:
-  cisco7600:
+  cisco-7600:
     term-setup:
       - terminal length 0
       - terminal width 0
