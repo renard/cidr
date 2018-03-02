@@ -1,0 +1,10 @@
+drivers:
+  cisco-asa:
+    term-setup:
+      - terminal pager 0
+    commands:
+      - {cli: 'dir /all all-filesystems', quote: yes}
+      - {cli: show vlan, quote: yes}
+      - {cli: show configuration}
+    filters:
+      - 'Using \d+ out of \d+ bytes'
