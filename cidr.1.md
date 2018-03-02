@@ -5,7 +5,7 @@ header: User manual
 footer: cidr
 author:
   - Sébastien Gross  &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt; (**@renard_0**)
-date: 2017-10-19 15:25:58
+date: 2018-03-02 13:39:24
 adjusting: b
 hyphenate: yes
 ---
@@ -108,9 +108,9 @@ consists of 3 definitions:
 - **filters**: a list of python compatible regular expressions to filter the
   command output. This is useful to remove irrelevant lines. 
 
-Example for the *cisco7600* driver:
+Example for the *cisco-7600* driver:
 
-    cisco7600:
+    cisco-7600:
       commands:
         - {cli: terminal length 0, display: no}
         - {cli: terminal width 0, display: no}
@@ -147,7 +147,7 @@ Examples:
       password: password-for-cidr
       enable: enable-password
       protocol: ssh
-      driver: cisco7600
+      driver: cisco-7600
 
     - name: sw1.example.com
       username: cidr
