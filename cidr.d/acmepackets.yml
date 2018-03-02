@@ -4,4 +4,5 @@ drivers:
     #   - terminal length 0
     commands:
       - {cli: show version, quote: yes}
+      - {cli: show entitlements, quote: yes}
       - {cli: show running-config}
