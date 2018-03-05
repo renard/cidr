@@ -40,7 +40,7 @@ and run as `root`:
 
 Configure `cidr.yml` file with devices and run:
 
-    ./cidr.py -v --config cidr.yml backup-config -t 64
+    ./cidr -v --config cidr.yml backup-config -t 64
 
 # Supported devices
 
@@ -71,5 +71,5 @@ devices.
   * Acme Packet Net-Net 3820 SBC
 
 
-Please note that for some devices (suche as Acme Packet) The configuration
-cannot be reimported as it.
+Please note that for some devices (such as Acme Packet) The configuration
+might not be reimported as it.
