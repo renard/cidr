@@ -5,7 +5,7 @@ header: User manual
 footer: cidr
 author:
   - Sébastien Gross  &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt; (**@renard_0**)
-date: 2018-03-02 13:39:24
+date: 2018-03-02 13:40:27
 adjusting: b
 hyphenate: yes
 ---
@@ -167,6 +167,6 @@ Examples:
 
 # COPYRIGHT
 
-Copyright © 2015-2017 Sébastien Gross &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt;.
+Copyright © 2015-2018 Sébastien Gross &lt;seb•ɑƬ•chezwam•ɖɵʈ•org&gt;.
 
 Released under [WTFPL version 2 or higher](http://sam.zoy.org/wtfpl/COPYING).
