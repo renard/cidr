@@ -16,3 +16,4 @@ drivers:
     filters:
       - '.* UTC'
       - 'Using \d+ out of \d+ bytes'
+      - '.* uptime is .*'

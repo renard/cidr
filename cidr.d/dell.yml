@@ -8,3 +8,4 @@ drivers:
       - {cli: show running-config all}
     filters:
       - 'Using \d+ out of \d+ bytes'
+      - 'System Up Time'
