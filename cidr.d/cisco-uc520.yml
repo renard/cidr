@@ -8,7 +8,8 @@ drivers:
       - {cli: 'dir /all all-filesystems', quote: yes}
       - {cli: show vlans, quote: yes}
       - {cli: show vlan-switch, quote: yes}
-      - {cli: show access-lists, quote: yes }
+      ## Access list also show a match counter. Wee don't want it.
+      ##- {cli: show access-lists, quote: yes }
       - {cli: show vtp status, quote: yes }
       - {cli: show running-config all}
     filters:
