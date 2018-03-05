@@ -73,3 +73,37 @@ devices.
 
 Please note that for some devices (such as Acme Packet) The configuration
 might not be reimported as it.
+
+# Known issues
+
+
+* `RequirementParseError: Invalid requirement, parse error at "''"`
+
+In some environment you may experience errors like:
+
+```
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/Exscript/workqueue/job.py", line 78, in run
+    self.function(self)
+  File "/usr/local/lib/python2.7/dist-packages/Exscript/queue.py", line 101, in _wrapped
+    conn.connect(host.get_address(), host.get_tcp_port())
+  File "/usr/local/lib/python2.7/dist-packages/Exscript/protocols/protocol.py", line 609, in connect
+    return self._connect_hook(self.host, port)
+  File "/usr/local/lib/python2.7/dist-packages/Exscript/protocols/ssh2.py", line 299, in _connect_hook
+    self.client = self._paramiko_connect()
+  File "/usr/local/lib/python2.7/dist-packages/Exscript/protocols/ssh2.py", line 162, in _paramiko_connect
+    t.start_client()
+  File "/usr/lib/python2.7/dist-packages/paramiko/transport.py", line 493, in start_client
+    raise e
+RequirementParseError: Invalid requirement, parse error at "''"
+```
+
+This happens randomly without any particular reason. This seems to be
+related to a `paramiko`, `pyca`, `packaging` or `setuptools` bug in
+multi-threading mode. See:
+
+* https://github.com/paramiko/paramiko/issues/931
+* https://github.com/pyca/cryptography/issues/3495
+* https://github.com/pypa/packaging/issues/104
+
+The best way is to reduce the number of threads.
