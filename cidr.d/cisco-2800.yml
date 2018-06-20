@@ -1,0 +1,12 @@
+drivers:
+  cisco-2800:
+    term-setup:
+      - terminal length 0
+      - terminal width 0
+    commands:
+      - {cli: show inventory, quote: yes}
+      - {cli: 'dir /all all-filesystems', quote: yes}
+      - {cli: show vlans, quote: yes}
+      - {cli: show configuration}
+    filters:
+      - 'Using \d+ out of \d+ bytes'
