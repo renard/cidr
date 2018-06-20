@@ -49,6 +49,7 @@ other may work as well. Please let me know if you have other working
 devices.
 
 * Cisco
+  * 2800 Series
   * 7300 Series
   * 7600 Series
   * ASR9K Series
